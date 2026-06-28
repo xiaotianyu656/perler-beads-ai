@@ -289,11 +289,11 @@ export async function downloadImage({
     if (includeStats && colorCounts) {
       const colorKeys = Object.keys(colorCounts);
       const statsTopMargin = 24;
-      const cardGap = 10;
-      const headerHeight = 42;
-      const cardHeight = 72;
-      const cardMinWidth = 120;
-      const numColumns = Math.max(2, Math.min(6, Math.floor(preCalcAvailableWidth / cardMinWidth)));
+      const cardGap = 8;
+      const headerHeight = 36;
+      const cardHeight = 76;
+      const cardMinWidth = 132;
+      const numColumns = Math.max(2, Math.min(5, Math.floor(preCalcAvailableWidth / cardMinWidth)));
       const numRows = Math.ceil(colorKeys.length / numColumns);
 
       statsHeight =
@@ -609,25 +609,25 @@ export async function downloadImage({
     if (includeStats && colorCounts) {
       const colorKeys = Object.keys(colorCounts).sort(sortColorKeys);
       const statsTopMargin = 24;
-      const cardGap = 10;
-      const headerHeight = 42;
-      const cardHeight = 72;
+      const cardGap = 8;
+      const headerHeight = 36;
+      const cardHeight = 76;
       const availableStatsWidth = downloadWidth - (statsPadding * 2);
-      const renderNumColumns = Math.max(2, Math.min(6, Math.floor(availableStatsWidth / 120)));
+      const renderNumColumns = Math.max(2, Math.min(5, Math.floor(availableStatsWidth / 132)));
       const numRows = Math.ceil(colorKeys.length / renderNumColumns);
       const itemWidth = Math.floor((availableStatsWidth - (cardGap * (renderNumColumns - 1))) / renderNumColumns);
       const statsY = titleBarHeight + extraTopMargin + M * downloadCellSize + (axisLabelSize * 2) + statsTopMargin;
 
       ctx.fillStyle = '#111827';
-      ctx.font = `bold ${Math.max(18, statsFontSize + 3)}px system-ui, -apple-system, sans-serif`;
+      ctx.font = 'bold 14px system-ui, -apple-system, sans-serif';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText('用料清单', statsPadding, statsY + 18);
+      ctx.fillText('用料清单', statsPadding, statsY + 16);
 
-      ctx.font = `bold ${Math.max(15, statsFontSize)}px system-ui, -apple-system, sans-serif`;
+      ctx.font = 'bold 13px system-ui, -apple-system, sans-serif';
       ctx.textAlign = 'right';
       ctx.fillStyle = '#111827';
-      ctx.fillText(`共 ${totalBeadCount.toLocaleString()} 颗`, downloadWidth - statsPadding, statsY + 18);
+      ctx.fillText(`共 ${totalBeadCount.toLocaleString()} 颗`, downloadWidth - statsPadding, statsY + 16);
 
       ctx.strokeStyle = '#E5E7EB';
       ctx.lineWidth = 1;
@@ -642,7 +642,7 @@ export async function downloadImage({
         const cellData = colorCounts[key];
         const itemX = statsPadding + (colIndex * (itemWidth + cardGap));
         const itemY = statsY + headerHeight + (rowIndex * (cardHeight + cardGap));
-        const colorBandHeight = 34;
+        const colorBandHeight = 40;
         const radius = 6;
 
         ctx.fillStyle = '#FFFFFF';
@@ -662,14 +662,14 @@ export async function downloadImage({
         ctx.restore();
 
         ctx.fillStyle = getContrastColor(cellData.color);
-        ctx.font = `bold ${Math.max(13, statsFontSize)}px system-ui, -apple-system, sans-serif`;
+        ctx.font = 'bold 11px system-ui, -apple-system, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(getColorKeyByHex(key, selectedColorSystem), itemX + itemWidth / 2, itemY + colorBandHeight / 2);
 
         ctx.fillStyle = '#111827';
-        ctx.font = `bold ${Math.max(14, statsFontSize + 1)}px system-ui, -apple-system, sans-serif`;
-        ctx.fillText(cellData.count.toLocaleString(), itemX + itemWidth / 2, itemY + colorBandHeight + 22);
+        ctx.font = 'bold 12px system-ui, -apple-system, sans-serif';
+        ctx.fillText(cellData.count.toLocaleString(), itemX + itemWidth / 2, itemY + colorBandHeight + 23);
       });
 
       statsHeight =
