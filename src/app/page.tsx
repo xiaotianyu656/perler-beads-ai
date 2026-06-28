@@ -1995,10 +1995,10 @@ export default function Home() {
 
             {/* Ultra fancy brand name and tool name with hyper cute decorations */}
             <div className="relative flex flex-col items-center space-y-3">
-              {/* Brand name - LDB with ultra fancy effects */}
+              {/* Brand name - 卧勒个豆 with ultra fancy effects */}
               <div className="relative">
                 <h1 className="relative text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 via-blue-500 to-cyan-400 tracking-wider drop-shadow-2xl transform hover:scale-105 transition-transform duration-300 animate-bounce">
-                  LDB
+                  卧勒个豆
                 </h1>
                 
                 {/* Super fancy geometric decorations */}
@@ -2018,10 +2018,10 @@ export default function Home() {
                 <div className="absolute bottom-1 right-0 w-1 h-1 bg-purple-300 rounded-full animate-pulse delay-1000"></div>
               </div>
               
-              {/* Tool name - 拼豆底稿生成器 with hyper cute style */}
+              {/* Tool name - XTY 卧勒个豆 &copy; {new Date().getFullYear()} with hyper cute style */}
               <div className="relative">
                 <h2 className="relative text-xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-teal-500 via-green-500 to-emerald-400 tracking-widest transform hover:scale-102 transition-all duration-300">
-                  拼豆AI生成
+                  拼豆图纸生成
                 </h2>
                 
                 {/* Super cute geometric shapes */}
@@ -2668,7 +2668,7 @@ export default function Home() {
 
         {/* Copyright text color */}
         <p className="font-medium text-gray-600 dark:text-gray-300">
-          LDB 拼豆底稿生成器 &copy; {new Date().getFullYear()}
+          卧勒个豆 XTY 卧勒个豆 &copy; {new Date().getFullYear()} &copy; {new Date().getFullYear()}
         </p>
       </footer>
 
