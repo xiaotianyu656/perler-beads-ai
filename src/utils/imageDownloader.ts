@@ -267,11 +267,11 @@ export async function downloadImage({
     const gridWidth = N * downloadCellSize;
     const gridHeight = M * downloadCellSize;
     
-    // 计算小红书标识区域的高度
-    const xiaohongshuAreaHeight = 0; // 为小红书名字预留的底部空间
+    // 导出图纸不再保留顶部品牌区和底部来源区
+    const xiaohongshuAreaHeight = 0;
   
     // 计算标题栏高度（根据图片大小自动调整）
-    const baseTitleBarHeight = 0; // 增大基础高度
+    const baseTitleBarHeight = 0;
     
     // 先计算一个初始下载宽度来确定缩放比例
     const initialWidth = gridWidth + axisLabelSize + extraLeftMargin;
@@ -283,101 +283,25 @@ export async function downloadImage({
     const titleFontSize = Math.max(28, Math.floor(28 * titleBarScale)); // 最小28px，确保可读性
     
     // 计算二维码大小
-    const qrSize = 0; // 增大二维码比例
+    const qrSize = Math.floor(titleBarHeight * 0.85); // 增大二维码比例
     
     // 计算统计区域的大小
     if (includeStats && colorCounts) {
-  const colorKeys = Object.keys(colorCounts).sort(sortColorKeys);
-
-  const statsTopMargin = 18;
-  const statsY =
-    titleBarHeight +
-    extraTopMargin +
-    M * downloadCellSize +
-    axisLabelSize * 2 +
-    statsPadding +
-    statsTopMargin;
-
-  const availableStatsWidth = downloadWidth - statsPadding * 2;
-  const cardGap = 8;
-  const cardHeight = 54;
-  const titleHeight = 26;
-  const renderNumColumns = Math.max(2, Math.floor((availableStatsWidth + cardGap) / 120));
-  const cardWidth = Math.floor((availableStatsWidth - cardGap * (renderNumColumns - 1)) / renderNumColumns);
-
-  ctx.fillStyle = '#111827';
-  ctx.font = 'bold 14px sans-serif';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
-  ctx.fillText('用料清单', statsPadding, statsY);
-
-  ctx.textAlign = 'right';
-  ctx.fillText(`共 ${totalBeadCount.toLocaleString()} 颗`, downloadWidth - statsPadding, statsY);
-
-  colorKeys.forEach((key, index) => {
-    const rowIndex = Math.floor(index / renderNumColumns);
-    const colIndex = index % renderNumColumns;
-    const itemX = statsPadding + colIndex * (cardWidth + cardGap);
-    const itemY = statsY + titleHeight + rowIndex * (cardHeight + cardGap);
-    const cellData = colorCounts[key];
-
-    ctx.fillStyle = '#ffffff';
-    ctx.strokeStyle = '#e5e7eb';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.roundRect(itemX, itemY, cardWidth, cardHeight, 4);
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.fillStyle = cellData.color;
-    ctx.beginPath();
-    ctx.roundRect(itemX, itemY, cardWidth, 32, 4);
-    ctx.fill();
-
-    ctx.fillStyle = getContrastColor(cellData.color);
-    ctx.font = 'bold 12px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(getColorKeyByHex(key, selectedColorSystem), itemX + cardWidth / 2, itemY + 16);
-
-    ctx.fillStyle = '#111827';
-    ctx.font = 'bold 11px sans-serif';
-    ctx.fillText(String(cellData.count), itemX + cardWidth / 2, itemY + 43);
-  });
-
-  const numRows = Math.ceil(colorKeys.length / renderNumColumns);
-  statsHeight = titleHeight + numRows * (cardHeight + cardGap) + statsPadding + statsTopMargin;
-}
-      
-      // 统计区域顶部额外间距
-      const statsTopMargin = 24; // 与下方渲染时保持一致
-      
-      // 根据可用宽度动态计算列数
-      const numColumns = Math.max(1, Math.min(4, Math.floor(preCalcAvailableWidth / 250)));
-      
-      // 根据可用宽度动态计算样式参数，使用更积极的线性缩放
-      const baseSwatchSize = 18; // 略微增大基础大小
-      // baseStatsFontSize 和 statsFontSize 在前面已经计算了，这里不需要重复
-      // const baseItemPadding = 10;
-      
-      // 调整缩放公式，使大宽度更明显增大
-      // widthFactor 在前面已经计算了，这里不需要重复
-      const swatchSize = Math.floor(baseSwatchSize + (widthFactor * 20)); // 增大最大增量幅度
-      // statsFontSize 在前面已经计算了，这里不需要重复
-      // const itemPadding = Math.floor(baseItemPadding + (widthFactor * 12)); // 增大最大增量幅度 // 移除未使用的 itemPadding
-      
-      // 计算实际需要的行数
+      const colorKeys = Object.keys(colorCounts);
+      const statsTopMargin = 24;
+      const cardGap = 10;
+      const headerHeight = 42;
+      const cardHeight = 72;
+      const cardMinWidth = 120;
+      const numColumns = Math.max(2, Math.min(6, Math.floor(preCalcAvailableWidth / cardMinWidth)));
       const numRows = Math.ceil(colorKeys.length / numColumns);
-      
-      // 计算单行高度 - 根据色块大小和内边距动态调整
-      const statsRowHeight = Math.max(swatchSize + 8, 25);
-      
-      // 标题和页脚高度
-      const titleHeight = 40; // 标题和分隔线的总高度
-      const footerHeight = 40; // 总计部分的高度
-      
-      // 计算统计区域的总高度 - 需要包含顶部间距
-      statsHeight = titleHeight + (numRows * statsRowHeight) + footerHeight + (statsPadding * 2) + statsTopMargin;
+
+      statsHeight =
+        statsTopMargin +
+        headerHeight +
+        (numRows * cardHeight) +
+        (Math.max(0, numRows - 1) * cardGap) +
+        statsPadding;
     }
   
     // 调整画布大小，包含标题栏、坐标轴、统计区域和小红书标识区域（四边都有坐标）
@@ -402,6 +326,7 @@ export async function downloadImage({
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, downloadWidth, downloadHeight);
   
+    if (titleBarHeight > 0) {
     // 重新设计的现代简洁标题栏
     // 1. 主背景 - 纯净的深色，专业感
     ctx.fillStyle = '#1F2937'; // 深灰色，既有专业感又不抢夺主要内容
@@ -505,6 +430,7 @@ export async function downloadImage({
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('扫码访问', qrX + qrSize / 2, qrY + qrSize / 2);
+    }
     }
   
     console.log(`Generating download grid image: ${downloadWidth}x${downloadHeight}`);
@@ -679,171 +605,79 @@ export async function downloadImage({
       M * downloadCellSize
     );
 
-    // 副水印：放在网格左上角，简洁版本
-    const secondaryWatermarkFontSize = Math.max(10, Math.floor(downloadCellSize * 0.5));
-    const secondaryText = '';
-    
-    ctx.font = `500 ${secondaryWatermarkFontSize}px system-ui, -apple-system, sans-serif`;
-    const secondaryMetrics = ctx.measureText(secondaryText);
-    const secondaryWidth = secondaryMetrics.width;
-    const secondaryHeight = secondaryWatermarkFontSize;
-    
-    const secondaryWatermarkX = extraLeftMargin + axisLabelSize + 15;
-    const secondaryWatermarkY = titleBarHeight + extraTopMargin + axisLabelSize + secondaryHeight + 15;
-    
-    // 副水印背景
-    const secondaryBgPadding = 4;
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-    ctx.beginPath();
-    ctx.roundRect(
-      secondaryWatermarkX - secondaryBgPadding,
-      secondaryWatermarkY - secondaryHeight - secondaryBgPadding,
-      secondaryWidth + secondaryBgPadding * 2,
-      secondaryHeight + secondaryBgPadding * 2,
-      3
-    );
-    ctx.fill();
-    
-    // 副水印文字
-    ctx.fillStyle = '#6B7280'; // 中等灰色，存在但不突兀
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(secondaryText, secondaryWatermarkX, secondaryWatermarkY);
-
     // 绘制统计信息
     if (includeStats && colorCounts) {
-      if (includeStats && colorCounts) {   const colorKeys = Object.keys(colorCounts).sort(sortColorKeys);    const statsTopMargin = 18;   const statsY =     titleBarHeight +     extraTopMargin +     M * downloadCellSize +     axisLabelSize * 2 +     statsPadding +     statsTopMargin;    const availableStatsWidth = downloadWidth - statsPadding * 2;   const cardGap = 8;   const cardHeight = 54;   const titleHeight = 26;   const renderNumColumns = Math.max(2, Math.floor((availableStatsWidth + cardGap) / 120));   const cardWidth = Math.floor((availableStatsWidth - cardGap * (renderNumColumns - 1)) / renderNumColumns);    ctx.fillStyle = '#111827';   ctx.font = 'bold 14px sans-serif';   ctx.textAlign = 'left';   ctx.textBaseline = 'top';   ctx.fillText('用料清单', statsPadding, statsY);    ctx.textAlign = 'right';   ctx.fillText(`共 ${totalBeadCount.toLocaleString()} 颗`, downloadWidth - statsPadding, statsY);    colorKeys.forEach((key, index) => {     const rowIndex = Math.floor(index / renderNumColumns);     const colIndex = index % renderNumColumns;     const itemX = statsPadding + colIndex * (cardWidth + cardGap);     const itemY = statsY + titleHeight + rowIndex * (cardHeight + cardGap);     const cellData = colorCounts[key];      ctx.fillStyle = '#ffffff';     ctx.strokeStyle = '#e5e7eb';     ctx.lineWidth = 1;     ctx.beginPath();     ctx.roundRect(itemX, itemY, cardWidth, cardHeight, 4);     ctx.fill();     ctx.stroke();      ctx.fillStyle = cellData.color;     ctx.beginPath();     ctx.roundRect(itemX, itemY, cardWidth, 32, 4);     ctx.fill();      ctx.fillStyle = getContrastColor(cellData.color);     ctx.font = 'bold 12px sans-serif';     ctx.textAlign = 'center';     ctx.textBaseline = 'middle';     ctx.fillText(getColorKeyByHex(key, selectedColorSystem), itemX + cardWidth / 2, itemY + 16);      ctx.fillStyle = '#111827';     ctx.font = 'bold 11px sans-serif';     ctx.fillText(String(cellData.count), itemX + cardWidth / 2, itemY + 43);   });    const numRows = Math.ceil(colorKeys.length / renderNumColumns);   statsHeight = titleHeight + numRows * (cardHeight + cardGap) + statsPadding + statsTopMargin; }
-      
-      // 增加额外的间距，防止标题文字侵入画布
-      const statsTopMargin = 24; // 增加间距，防止文字侵入画布
-      const statsY = titleBarHeight + extraTopMargin + M * downloadCellSize + (axisLabelSize * 2) + statsPadding + statsTopMargin;
-      
-      // 计算统计区域的可用宽度
+      const colorKeys = Object.keys(colorCounts).sort(sortColorKeys);
+      const statsTopMargin = 24;
+      const cardGap = 10;
+      const headerHeight = 42;
+      const cardHeight = 72;
       const availableStatsWidth = downloadWidth - (statsPadding * 2);
-      
-      // 根据可用宽度动态计算列数 - 这里使用实际渲染时的宽度
-      const renderNumColumns = Math.max(1, Math.min(4, Math.floor(availableStatsWidth / 250)));
-      
-      // 根据可用宽度动态计算样式参数，使用更积极的线性缩放
-      const baseSwatchSize = 18; // 略微增大基础大小
-      // baseStatsFontSize 和 statsFontSize 在前面已经计算了，这里不需要重复
-      // const baseItemPadding = 10;
-      
-      // 调整缩放公式，使大宽度更明显增大
-      // widthFactor 在前面已经计算了，这里不需要重复
-      const swatchSize = Math.floor(baseSwatchSize + (widthFactor * 20)); // 增大最大增量幅度
-      // statsFontSize 在前面已经计算了，这里不需要重复
-      // const itemPadding = Math.floor(baseItemPadding + (widthFactor * 12)); // 增大最大增量幅度 // 移除未使用的 itemPadding
-      
-      // 计算每个项目所占的宽度
-      const itemWidth = Math.floor(availableStatsWidth / renderNumColumns);
-      
-      // 绘制统计区域标题
-      ctx.fillStyle = '#333333';
-      ctx.font = `bold ${Math.max(16, statsFontSize)}px sans-serif`;
+      const renderNumColumns = Math.max(2, Math.min(6, Math.floor(availableStatsWidth / 120)));
+      const numRows = Math.ceil(colorKeys.length / renderNumColumns);
+      const itemWidth = Math.floor((availableStatsWidth - (cardGap * (renderNumColumns - 1))) / renderNumColumns);
+      const statsY = titleBarHeight + extraTopMargin + M * downloadCellSize + (axisLabelSize * 2) + statsTopMargin;
+
+      ctx.fillStyle = '#111827';
+      ctx.font = `bold ${Math.max(18, statsFontSize + 3)}px system-ui, -apple-system, sans-serif`;
       ctx.textAlign = 'left';
-      
-      // 绘制分隔线
-      ctx.strokeStyle = '#DDDDDD';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('用料清单', statsPadding, statsY + 18);
+
+      ctx.font = `bold ${Math.max(15, statsFontSize)}px system-ui, -apple-system, sans-serif`;
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#111827';
+      ctx.fillText(`共 ${totalBeadCount.toLocaleString()} 颗`, downloadWidth - statsPadding, statsY + 18);
+
+      ctx.strokeStyle = '#E5E7EB';
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(statsPadding, statsY + 20);
-      ctx.lineTo(downloadWidth - statsPadding, statsY + 20);
+      ctx.moveTo(statsPadding, statsY + headerHeight - 4);
+      ctx.lineTo(downloadWidth - statsPadding, statsY + headerHeight - 4);
       ctx.stroke();
-      
-      const titleHeight = 30; // 标题和分隔线的总高度
-      // 根据色块大小动态调整行高
-      const statsRowHeight = Math.max(swatchSize + 8, 25); // 确保行高足够放下色块和文字
-      
-      // 设置表格字体
-      ctx.font = `${statsFontSize}px sans-serif`;
-      
-      // 绘制每行统计信息
+
       colorKeys.forEach((key, index) => {
-        // 计算当前项目应该在哪一行和哪一列
         const rowIndex = Math.floor(index / renderNumColumns);
         const colIndex = index % renderNumColumns;
-        
-        // 计算当前项目的X起始位置
-        const itemX = statsPadding + (colIndex * itemWidth);
-        
-        // 计算当前行的Y位置
-        const rowY = statsY + titleHeight + (rowIndex * statsRowHeight) + (swatchSize / 2);
-        
         const cellData = colorCounts[key];
-        
-        // 绘制色块
+        const itemX = statsPadding + (colIndex * (itemWidth + cardGap));
+        const itemY = statsY + headerHeight + (rowIndex * (cardHeight + cardGap));
+        const colorBandHeight = 34;
+        const radius = 6;
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.strokeStyle = '#D1D5DB';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(itemX, itemY, itemWidth, cardHeight, radius);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(itemX, itemY, itemWidth, cardHeight, radius);
+        ctx.clip();
         ctx.fillStyle = cellData.color;
-        ctx.strokeStyle = '#CCCCCC';
-        ctx.fillRect(itemX, rowY - (swatchSize / 2), swatchSize, swatchSize);
-        ctx.strokeRect(itemX + 0.5, rowY - (swatchSize / 2) + 0.5, swatchSize - 1, swatchSize - 1);
-        
-        // 绘制色号
-        ctx.fillStyle = '#333333';
-        ctx.textAlign = 'left';
-        ctx.fillText(getColorKeyByHex(key, selectedColorSystem), itemX + swatchSize + 5, rowY);
-        
-        // 绘制数量 - 在每个项目的右侧
-        const countText = `${cellData.count} 颗`;
-        ctx.textAlign = 'right';
-        
-        // 根据列数计算数字的位置
-        // 如果只有一列，就靠右绘制
-        if (renderNumColumns === 1) {
-          ctx.fillText(countText, downloadWidth - statsPadding, rowY);
-        } else {
-          // 多列时，在每个单元格右侧偏内绘制
-          ctx.fillText(countText, itemX + itemWidth - 10, rowY);
-        }
+        ctx.fillRect(itemX, itemY, itemWidth, colorBandHeight);
+        ctx.restore();
+
+        ctx.fillStyle = getContrastColor(cellData.color);
+        ctx.font = `bold ${Math.max(13, statsFontSize)}px system-ui, -apple-system, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(getColorKeyByHex(key, selectedColorSystem), itemX + itemWidth / 2, itemY + colorBandHeight / 2);
+
+        ctx.fillStyle = '#111827';
+        ctx.font = `bold ${Math.max(14, statsFontSize + 1)}px system-ui, -apple-system, sans-serif`;
+        ctx.fillText(cellData.count.toLocaleString(), itemX + itemWidth / 2, itemY + colorBandHeight + 22);
       });
-      
-      // 计算实际需要的行数
-      const numRows = Math.ceil(colorKeys.length / renderNumColumns);
-      
-      // 绘制总量
-      const totalY = statsY + titleHeight + (numRows * statsRowHeight) + 10;
-      ctx.font = `bold ${statsFontSize}px sans-serif`;
-      ctx.textAlign = 'right';
-      ctx.fillText(`总计: ${totalBeadCount} 颗`, downloadWidth - statsPadding, totalY);
-      
-      // 统计区域水印 - 第三重保护，清晰明显
-      const statsWatermarkFontSize = Math.max(10, Math.floor(statsFontSize * 0.7));
-      const statsWatermarkText = '';
-      
-      ctx.font = `500 ${statsWatermarkFontSize}px system-ui, -apple-system, sans-serif`;
-      const statsTextMetrics = ctx.measureText(statsWatermarkText);
-      const statsTextWidth = statsTextMetrics.width;
-      const statsTextHeight = statsWatermarkFontSize;
-      
-      const statsWatermarkX = statsPadding;
-      const statsWatermarkY = totalY + 20;
-      
-      // 统计区域水印背景
-      const statsBgPadding = 5;
-      ctx.fillStyle = 'rgba(248, 250, 252, 0.9)'; // 浅灰背景，更柔和
-      ctx.beginPath();
-      ctx.roundRect(
-        statsWatermarkX - statsBgPadding,
-        statsWatermarkY - statsTextHeight - statsBgPadding,
-        statsTextWidth + statsBgPadding * 2,
-        statsTextHeight + statsBgPadding * 2,
-        3
-      );
-      ctx.fill();
-      
-      // 统计区域水印边框
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      
-      // 统计区域水印文字
-      ctx.fillStyle = '#64748B'; // 清晰的深灰色
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText(statsWatermarkText, statsWatermarkX, statsWatermarkY);
-      
-      // 更新统计区域高度的计算 - 需要包含新增的顶部间距
-      const footerHeight = 30; // 总计部分高度
-      statsHeight = titleHeight + (numRows * statsRowHeight) + footerHeight + (statsPadding * 2) + statsTopMargin;
+
+      statsHeight =
+        statsTopMargin +
+        headerHeight +
+        (numRows * cardHeight) +
+        (Math.max(0, numRows - 1) * cardGap) +
+        statsPadding;
     }
 
     // 重新计算画布高度并调整
