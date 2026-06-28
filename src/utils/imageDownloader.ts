@@ -268,10 +268,10 @@ export async function downloadImage({
     const gridHeight = M * downloadCellSize;
     
     // 计算小红书标识区域的高度
-    const xiaohongshuAreaHeight = 35; // 为小红书名字预留的底部空间
+    const xiaohongshuAreaHeight = 0; // 为小红书名字预留的底部空间
   
     // 计算标题栏高度（根据图片大小自动调整）
-    const baseTitleBarHeight = 80; // 增大基础高度
+    const baseTitleBarHeight = 0; // 增大基础高度
     
     // 先计算一个初始下载宽度来确定缩放比例
     const initialWidth = gridWidth + axisLabelSize + extraLeftMargin;
@@ -283,11 +283,71 @@ export async function downloadImage({
     const titleFontSize = Math.max(28, Math.floor(28 * titleBarScale)); // 最小28px，确保可读性
     
     // 计算二维码大小
-    const qrSize = Math.floor(titleBarHeight * 0.85); // 增大二维码比例
+    const qrSize = 0; // 增大二维码比例
     
     // 计算统计区域的大小
     if (includeStats && colorCounts) {
-      const colorKeys = Object.keys(colorCounts);
+  const colorKeys = Object.keys(colorCounts).sort(sortColorKeys);
+
+  const statsTopMargin = 18;
+  const statsY =
+    titleBarHeight +
+    extraTopMargin +
+    M * downloadCellSize +
+    axisLabelSize * 2 +
+    statsPadding +
+    statsTopMargin;
+
+  const availableStatsWidth = downloadWidth - statsPadding * 2;
+  const cardGap = 8;
+  const cardHeight = 54;
+  const titleHeight = 26;
+  const renderNumColumns = Math.max(2, Math.floor((availableStatsWidth + cardGap) / 120));
+  const cardWidth = Math.floor((availableStatsWidth - cardGap * (renderNumColumns - 1)) / renderNumColumns);
+
+  ctx.fillStyle = '#111827';
+  ctx.font = 'bold 14px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText('用料清单', statsPadding, statsY);
+
+  ctx.textAlign = 'right';
+  ctx.fillText(`共 ${totalBeadCount.toLocaleString()} 颗`, downloadWidth - statsPadding, statsY);
+
+  colorKeys.forEach((key, index) => {
+    const rowIndex = Math.floor(index / renderNumColumns);
+    const colIndex = index % renderNumColumns;
+    const itemX = statsPadding + colIndex * (cardWidth + cardGap);
+    const itemY = statsY + titleHeight + rowIndex * (cardHeight + cardGap);
+    const cellData = colorCounts[key];
+
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#e5e7eb';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(itemX, itemY, cardWidth, cardHeight, 4);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = cellData.color;
+    ctx.beginPath();
+    ctx.roundRect(itemX, itemY, cardWidth, 32, 4);
+    ctx.fill();
+
+    ctx.fillStyle = getContrastColor(cellData.color);
+    ctx.font = 'bold 12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(getColorKeyByHex(key, selectedColorSystem), itemX + cardWidth / 2, itemY + 16);
+
+    ctx.fillStyle = '#111827';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText(String(cellData.count), itemX + cardWidth / 2, itemY + 43);
+  });
+
+  const numRows = Math.ceil(colorKeys.length / renderNumColumns);
+  statsHeight = titleHeight + numRows * (cardHeight + cardGap) + statsPadding + statsTopMargin;
+}
       
       // 统计区域顶部额外间距
       const statsTopMargin = 24; // 与下方渲染时保持一致
@@ -621,7 +681,7 @@ export async function downloadImage({
 
     // 副水印：放在网格左上角，简洁版本
     const secondaryWatermarkFontSize = Math.max(10, Math.floor(downloadCellSize * 0.5));
-    const secondaryText = '@LDB';
+    const secondaryText = '';
     
     ctx.font = `500 ${secondaryWatermarkFontSize}px system-ui, -apple-system, sans-serif`;
     const secondaryMetrics = ctx.measureText(secondaryText);
@@ -652,7 +712,7 @@ export async function downloadImage({
 
     // 绘制统计信息
     if (includeStats && colorCounts) {
-      const colorKeys = Object.keys(colorCounts).sort(sortColorKeys);
+      if (includeStats && colorCounts) {   const colorKeys = Object.keys(colorCounts).sort(sortColorKeys);    const statsTopMargin = 18;   const statsY =     titleBarHeight +     extraTopMargin +     M * downloadCellSize +     axisLabelSize * 2 +     statsPadding +     statsTopMargin;    const availableStatsWidth = downloadWidth - statsPadding * 2;   const cardGap = 8;   const cardHeight = 54;   const titleHeight = 26;   const renderNumColumns = Math.max(2, Math.floor((availableStatsWidth + cardGap) / 120));   const cardWidth = Math.floor((availableStatsWidth - cardGap * (renderNumColumns - 1)) / renderNumColumns);    ctx.fillStyle = '#111827';   ctx.font = 'bold 14px sans-serif';   ctx.textAlign = 'left';   ctx.textBaseline = 'top';   ctx.fillText('用料清单', statsPadding, statsY);    ctx.textAlign = 'right';   ctx.fillText(`共 ${totalBeadCount.toLocaleString()} 颗`, downloadWidth - statsPadding, statsY);    colorKeys.forEach((key, index) => {     const rowIndex = Math.floor(index / renderNumColumns);     const colIndex = index % renderNumColumns;     const itemX = statsPadding + colIndex * (cardWidth + cardGap);     const itemY = statsY + titleHeight + rowIndex * (cardHeight + cardGap);     const cellData = colorCounts[key];      ctx.fillStyle = '#ffffff';     ctx.strokeStyle = '#e5e7eb';     ctx.lineWidth = 1;     ctx.beginPath();     ctx.roundRect(itemX, itemY, cardWidth, cardHeight, 4);     ctx.fill();     ctx.stroke();      ctx.fillStyle = cellData.color;     ctx.beginPath();     ctx.roundRect(itemX, itemY, cardWidth, 32, 4);     ctx.fill();      ctx.fillStyle = getContrastColor(cellData.color);     ctx.font = 'bold 12px sans-serif';     ctx.textAlign = 'center';     ctx.textBaseline = 'middle';     ctx.fillText(getColorKeyByHex(key, selectedColorSystem), itemX + cardWidth / 2, itemY + 16);      ctx.fillStyle = '#111827';     ctx.font = 'bold 11px sans-serif';     ctx.fillText(String(cellData.count), itemX + cardWidth / 2, itemY + 43);   });    const numRows = Math.ceil(colorKeys.length / renderNumColumns);   statsHeight = titleHeight + numRows * (cardHeight + cardGap) + statsPadding + statsTopMargin; }
       
       // 增加额外的间距，防止标题文字侵入画布
       const statsTopMargin = 24; // 增加间距，防止文字侵入画布
@@ -747,7 +807,7 @@ export async function downloadImage({
       
       // 统计区域水印 - 第三重保护，清晰明显
       const statsWatermarkFontSize = Math.max(10, Math.floor(statsFontSize * 0.7));
-      const statsWatermarkText = '图纸来源：小红书@LDB';
+      const statsWatermarkText = '';
       
       ctx.font = `500 ${statsWatermarkFontSize}px system-ui, -apple-system, sans-serif`;
       const statsTextMetrics = ctx.measureText(statsWatermarkText);
