@@ -1,7 +1,7 @@
 {
-  "name": "LDB拼豆底稿生成器",
-  "short_name": "LDB",
-  "description": "LDB拼豆底稿生成器，让你轻松制作精美的像素画作品",
+  "name": "卧勒个豆",
+  "short_name": "卧勒个豆",
+  "description": "卧勒个豆，轻松生成拼豆图纸和像素画作品",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#E8F4FD",
