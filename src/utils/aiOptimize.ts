@@ -1,6 +1,26 @@
 // AI图片优化工具函数
 
-const DEFAULT_PROMPT = '图片修改为：chibi画风，背景白底。pixel art style, 16-bit, retro game aesthetic, sharp focus, high contrast, clean lines, detailed pixel art, masterpiece, best quality';
+const DEFAULT_PROMPT = `Convert the input image into a cute chibi illustration optimized for bead pattern generation.
+
+Preserve the original identity, hairstyle, clothing colors, pose, facial features, and overall composition as closely as possible.
+
+Use a clean white background.
+
+Simplify unnecessary details while maintaining recognizability.
+
+Use large continuous flat color regions with strong clean outlines.
+
+Minimize gradients, shadows, highlights, reflections, and textures.
+
+Merge similar color regions whenever possible.
+
+Reduce tiny decorations, wrinkles, hair strands, and accessories.
+
+Maintain high contrast between adjacent color areas.
+
+Keep facial features simple, expressive, and easy to recognize.
+
+The final illustration should be easy to convert into pixel art and bead patterns with limited color palettes while preserving the character of the original image.`;
 
 export interface AIOptimizeOptions {
   customPrompt?: string;
